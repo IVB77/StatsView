@@ -87,7 +87,7 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
-        var dataOfShare : List<Float> = changeToShare(data)
+        val dataOfShare : List<Float> = changeToShare(data)
         var startAngle = -90F
         dataOfShare.forEachIndexed() { index, datum ->
             val angle = datum * 360F
@@ -95,6 +95,8 @@ class StatsView @JvmOverloads constructor(
             canvas.drawArc(oval, startAngle, angle, false, paint)
             startAngle += angle
         }
+        paint.color = colors.first()
+        canvas.drawPoint(center.x,center.y-radius,paint)
         canvas.drawText(
             "%.2f%%".format(dataOfShare.sum() * 100),
             center.x,

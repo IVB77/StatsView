@@ -15,7 +15,7 @@
         app:color1="#391279"
         app:color2="#939124"
         app:color3="#122413"
-        app:color4="#582012"
+        app:color4="#987654"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
