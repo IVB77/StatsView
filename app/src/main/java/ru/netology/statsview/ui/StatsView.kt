@@ -30,6 +30,7 @@ class StatsView @JvmOverloads constructor(
     private var textSize = AndroidUtils.dp(context, 30).toFloat()
     private var lineWidth = AndroidUtils.dp(context, 5)
     private var colors = emptyList<Int>()
+    private var colorEmpty = 0
 
     init {
         context.withStyledAttributes(attributeSet, R.styleable.StatsView) {
@@ -41,6 +42,7 @@ class StatsView @JvmOverloads constructor(
                 getColor(R.styleable.StatsView_color3, generateRandomColor()),
                 getColor(R.styleable.StatsView_color4, generateRandomColor()),
             )
+            colorEmpty=getColor(R.styleable.StatsView_colorEmpty, 0xFFFFFFFF.toInt())
         }
     }
 
@@ -49,7 +51,7 @@ class StatsView @JvmOverloads constructor(
             field = value
             invalidate()
         }
-
+    var pctTotal = 100F
 
 
 
@@ -87,18 +89,24 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
-        val dataOfShare : List<Float> = changeToShare(data)
+        val dataOfShare : List<Float> = changeToShare(data,pctTotal)
         var startAngle = -90F
         dataOfShare.forEachIndexed() { index, datum ->
             val angle = datum * 360F
-            paint.color = colors.getOrElse(index) { generateRandomColor() }
+            if(dataOfShare.lastIndex==index && pctTotal<100){
+                paint.color = colorEmpty
+            }
+            else {
+                paint.color = colors.getOrElse(index) { generateRandomColor() }
+            }
             canvas.drawArc(oval, startAngle, angle, false, paint)
             startAngle += angle
         }
+
         paint.color = colors.first()
         canvas.drawPoint(center.x,center.y-radius,paint)
         canvas.drawText(
-            "%.2f%%".format(dataOfShare.sum() * 100),
+            "%.2f%%".format(pctTotal),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint
@@ -107,9 +115,18 @@ class StatsView @JvmOverloads constructor(
     }
 }
 
-fun changeToShare(data: List<Float>): List<Float> {
-    var dataOfShare = emptyList<Float>()
-    data.forEach { dataOfShare= dataOfShare + (it / data.sum())}
-    return dataOfShare
+fun changeToShare(data: List<Float>, pctTotal: Float): List<Float> {
+    if (pctTotal>=100F) {
+        var dataOfShare = emptyList<Float>()
+        data.forEach { dataOfShare = dataOfShare + (it / data.sum()) }
+        return dataOfShare
+    }
+    else{
+        var dataOfShare = emptyList<Float>()
+        val sum = data.sum()/pctTotal*100
+        data.forEach { dataOfShare = dataOfShare + (it / sum) }
+        dataOfShare = dataOfShare + (100-pctTotal)/100
+        return dataOfShare
+    }
 }
 fun generateRandomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
